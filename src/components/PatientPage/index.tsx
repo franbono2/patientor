@@ -48,8 +48,29 @@ const PatientPage = () => {
       </Typography>
       <Typography variant="body1" style={{ marginBottom: "0.5em"}}>
             ssn: {patient.ssn} <br/>
-            occupation: {patient.occupation}
+            occupation: {patient.occupation} <br />
       </Typography>
+      <Typography variant="h5" style={{ marginBottom: "0.5em"}}>
+        entries
+      </Typography>
+      {patient.entries.map((entry => (
+        <section key={entry.id}>
+          <Typography variant="body1" style={{ marginBottom: "0.5em"}}>
+            {entry.date} {entry.description}
+          </Typography>
+          {entry.diagnosisCodes && (
+            <ul>
+              {
+                entry.diagnosisCodes.map((code) => (
+                  <Typography key={code} component="li" variant="body1" style={{ marginBottom: "0.25em"}}>
+                    {code}
+                  </Typography>
+                ))
+              }
+            </ul>
+          )}
+        </section>
+      )))}
     </div>
   );
 };
