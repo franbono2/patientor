@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Gender, Patient } from "../../types";
+import { Diagnosis, Gender, Patient } from "../../types";
 import patientService from "../../services/patients";
+import diagnoseService from "../../services/diagnoses";
 import { Typography } from "@mui/material";
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
@@ -9,7 +10,8 @@ import TransgenderIcon from '@mui/icons-material/Transgender';
 
 
 const PatientPage = () => {
-  const [patient, setPatient] = useState<Patient>();
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const params = useParams();
 
   useEffect(() => {
@@ -17,11 +19,16 @@ const PatientPage = () => {
       const patient = await patientService.getPatientById(id);
       setPatient(patient);
     };
+    const fetchDiagnoses = async () => {
+      const diagnoses = await diagnoseService.getAll();
+      setDiagnoses(diagnoses);
+    };
     const id = params.patientId as string;
     void fetchPatientById(id);
+    void fetchDiagnoses();
   }, [params.patientId]);
 
-  if (patient === undefined) {
+  if (patient === null) {
     return (
       <>
         <h1>Patient Not Found</h1>
@@ -63,7 +70,7 @@ const PatientPage = () => {
               {
                 entry.diagnosisCodes.map((code) => (
                   <Typography key={code} component="li" variant="body1" style={{ marginBottom: "0.25em"}}>
-                    {code}
+                    {code} {diagnoses.find(d => d.code === code)?.name}
                   </Typography>
                 ))
               }
