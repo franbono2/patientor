@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Diagnosis, Gender, Patient } from "../../types";
+import { Diagnosis, Entry, Gender, Patient } from "../../types";
 import patientService from "../../services/patients";
 import diagnoseService from "../../services/diagnoses";
 import { Typography } from "@mui/material";
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
+import HealthCheck from "./EntryCard/HealthCheck";
+import Hospital from "./EntryCard/Hospital";
+import OccupationalHealthcare from "./EntryCard/OccupationalHealthcare";
 
 
 const PatientPage = () => {
@@ -42,9 +45,19 @@ const PatientPage = () => {
         return <MaleIcon style={{ fontSize: 30 }} />;
       case Gender.Female:
         return <FemaleIcon style={{ fontSize: 30 }} />;
-      default:
+      case Gender.Other:
         return <TransgenderIcon style={{ fontSize: 30 }} />;
-        
+    }
+  };
+
+  const EntryDetails = (entry: Entry) => {
+    switch (entry.type) {
+      case "Hospital":
+        return <Hospital key={entry.id} entry={entry} diagnoses={diagnoses}/>;
+      case "OccupationalHealthcare":
+        return <OccupationalHealthcare key={entry.id} entry={entry} diagnoses={diagnoses}/>;
+      case "HealthCheck":
+        return <HealthCheck key={entry.id} entry={entry} diagnoses={diagnoses}/>;
     }
   };
 
@@ -61,22 +74,7 @@ const PatientPage = () => {
         entries
       </Typography>
       {patient.entries.map((entry => (
-        <section key={entry.id}>
-          <Typography variant="body1" style={{ marginBottom: "0.5em"}}>
-            {entry.date} {entry.description}
-          </Typography>
-          {entry.diagnosisCodes && (
-            <ul>
-              {
-                entry.diagnosisCodes.map((code) => (
-                  <Typography key={code} component="li" variant="body1" style={{ marginBottom: "0.25em"}}>
-                    {code} {diagnoses.find(d => d.code === code)?.name}
-                  </Typography>
-                ))
-              }
-            </ul>
-          )}
-        </section>
+        EntryDetails(entry)
       )))}
     </div>
   );
