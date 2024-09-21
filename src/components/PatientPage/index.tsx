@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Diagnosis, Entry, Gender, Patient } from "../../types";
+import { Diagnosis, Entry, EntryWithoutId, Gender, Patient } from "../../types";
 import patientService from "../../services/patients";
 import diagnoseService from "../../services/diagnoses";
 import { Typography } from "@mui/material";
@@ -10,11 +10,16 @@ import TransgenderIcon from '@mui/icons-material/Transgender';
 import HealthCheck from "./EntryCard/HealthCheck";
 import Hospital from "./EntryCard/Hospital";
 import OccupationalHealthcare from "./EntryCard/OccupationalHealthcare";
+import EntryForm from "./EntryCard/EntryForm";
+import { AxiosError } from "axios";
+import Notification from "../Notification";
 
 
 const PatientPage = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+  const [notify, setNotify] = useState(false);
+  const [notifyMessage, setNotifyMessage] = useState('');
   const params = useParams();
 
   useEffect(() => {
@@ -61,6 +66,30 @@ const PatientPage = () => {
     }
   };
 
+  const addEntry = async (entry: EntryWithoutId) => {
+    try {
+      const id = params.patientId as string;
+      const addedEntry = await patientService.addEntry(id, entry);
+      const updatedPatient = {
+        ...patient,
+        entries: patient.entries.concat(addedEntry)
+      };
+      setPatient(updatedPatient);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const errorMessage = error.response?.data.replace('Something went wrong. Error: ', '');
+        setNotifyMessage(errorMessage);
+        setNotify(true);
+        setTimeout(() => {
+          setNotifyMessage('');
+          setNotify(false);
+        }, 5000);
+        console.log(errorMessage);
+      }
+      console.error(error);
+    }
+  };
+
   return (
     <div>
       <Typography variant="h4" style={{ marginBottom: "0.5em", marginTop: "1em" }}>
@@ -70,6 +99,8 @@ const PatientPage = () => {
             ssn: {patient.ssn} <br/>
             occupation: {patient.occupation} <br />
       </Typography>
+      <Notification open={notify} message={notifyMessage} />
+      <EntryForm addEntry={addEntry}/>
       <Typography variant="h5" style={{ marginBottom: "0.5em"}}>
         entries
       </Typography>

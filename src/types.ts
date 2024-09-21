@@ -67,3 +67,7 @@ export interface HospitalEntry extends BaseEntry {
 }
 
 export type PatientFormValues = Omit<Patient, "id" | "entries">;
+// Define omit especial para uniones
+type UnionOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
+// Define Entry sin la propiedad 'id'
+export type EntryWithoutId = UnionOmit<Entry, 'id'>;
