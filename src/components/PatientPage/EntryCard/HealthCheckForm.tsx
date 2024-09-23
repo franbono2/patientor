@@ -1,12 +1,13 @@
-import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, FormControl, Grid, Input, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { EntryWithoutId, HealthCheckRating } from "../../../types";
+import { Diagnosis, EntryWithoutId, HealthCheckRating } from "../../../types";
 
 interface Props {
   addEntry: (entry: EntryWithoutId) => Promise<void>;
+  diagnoses: Diagnosis[];
 }
 
-const HealthCheckForm = ({ addEntry } : Props) => {
+const HealthCheckForm = ({ addEntry, diagnoses } : Props) => {
   const initialState: EntryWithoutId = {
     description: '',
     date: '',
@@ -16,6 +17,8 @@ const HealthCheckForm = ({ addEntry } : Props) => {
     healthCheckRating: HealthCheckRating.Healthy,
   };
   const [formData, setFormData] = useState(initialState);
+  const [diagnosisCodes, setDiagnosisCodes] = useState<string[]>([]);
+  const [healthCheckRating, setHealthCheckRating] = useState<HealthCheckRating | ''>('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,13 +28,27 @@ const HealthCheckForm = ({ addEntry } : Props) => {
     });
   };
 
-  const handleDiagnosisCodesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    const diagnosisCodes = value.split(',').flat().map(code => code.trim());
-    setFormData({
-      ...formData,
-      diagnosisCodes: diagnosisCodes,
-    });
+  // const handleDiagnosisCodesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { value } = e.target;
+  //   const diagnosisCodes = value.split(',').flat().map(code => code.trim());
+  //   setFormData({
+  //     ...formData,
+  //     diagnosisCodes: diagnosisCodes,
+  //   });
+  // };
+
+  const handleHealthCheckRatingChange = (event: SelectChangeEvent<typeof healthCheckRating>) => {
+    setHealthCheckRating(event.target.value as HealthCheckRating);
+  };
+
+  const handleDiagnosisCodesChange = (event: SelectChangeEvent<typeof diagnosisCodes>) => {
+    const {
+      target: { value },
+    } = event;
+    setDiagnosisCodes(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
   };
 
   const formStyle = {
@@ -49,7 +66,8 @@ const HealthCheckForm = ({ addEntry } : Props) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    formData.healthCheckRating = Number(formData.healthCheckRating);
+    formData.healthCheckRating = healthCheckRating as HealthCheckRating;
+    formData.diagnosisCodes = diagnosisCodes;
     console.log('Form Data:', formData);
     addEntry(formData);
   };
@@ -74,13 +92,13 @@ const HealthCheckForm = ({ addEntry } : Props) => {
         required
         fullWidth
       />
-      <TextField
+      <Input
         id="date"
         name="date"
+        type="date"
         value={formData.date}
         onChange={handleChange}
-        label="Date"
-        variant="standard" 
+        placeholder="Date"
         required
         fullWidth
         />
@@ -94,25 +112,44 @@ const HealthCheckForm = ({ addEntry } : Props) => {
         required
         fullWidth
         />
-      <TextField
-        id="healthCheckRating"
-        name="healthCheckRating"
-        value={formData.healthCheckRating}
-        onChange={handleChange}
-        label="Healthcheck Rating"
-        variant="standard" 
-        required
-        fullWidth
-        />
-      <TextField
-        id="diagnosisCodes"
-        name="diagnosisCodes"
-        value={formData.diagnosisCodes}
-        onChange={handleDiagnosisCodesChange}
-        label="Diagnosis codes"
-        variant="standard" 
-        fullWidth
-        />
+      <FormControl fullWidth>
+        <InputLabel id="healthCheck-label">HealthCheck Rating</InputLabel>
+        <Select
+          labelId="healthCheck-label"
+          value={healthCheckRating}
+          onChange={handleHealthCheckRatingChange}
+          label="HealthCheckRating"
+          required
+        >
+          {Object.values(HealthCheckRating)
+          .filter((key) => isNaN(Number(key)))
+          .map((value) => (
+            <MenuItem key={value} value={HealthCheckRating[value as keyof typeof HealthCheckRating]}>
+              {value}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl>
+        <InputLabel id="diagnosisCodesLabel">Diagnosis Codes</InputLabel>
+        <Select
+          labelId="diagnosisCodesLabel"
+          id="diagnosisCheckbox"
+          multiple
+          value={diagnosisCodes}
+          onChange={handleDiagnosisCodesChange}
+          renderValue={(selected) => selected.join(', ')}
+        >
+          {
+            diagnoses.map((diagnose) => (
+              <MenuItem key={diagnose.code} value={diagnose.code}>
+                <Checkbox checked={diagnosisCodes.includes(diagnose.code)}/>
+                <ListItemText primary={diagnose.code} />
+              </MenuItem>
+            ))
+          }
+        </Select>
+      </FormControl>
       <Grid>
           <Grid item>
             <Button

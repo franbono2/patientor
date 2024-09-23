@@ -101,11 +101,11 @@ const PatientPage = () => {
   const EntryForm = () => {
     switch (selectedOption) {
       case "Hospital":
-        return <HospitalForm addEntry={addEntry} />;
+        return <HospitalForm addEntry={addEntry} diagnoses={diagnoses}/>;
       case "OccupationalHealthcare":
-        return <OccupationalHealthcareForm addEntry={addEntry} />;
+        return <OccupationalHealthcareForm addEntry={addEntry} diagnoses={diagnoses} />;
       case "HealthCheck":
-        return <HealthCheckForm addEntry={addEntry} />;
+        return <HealthCheckForm addEntry={addEntry} diagnoses={diagnoses} />;
       default:
         break;
     }
