@@ -33,7 +33,7 @@ const HealthCheck = ({ entry, diagnoses } : { entry: HealthCheckEntry, diagnoses
         <FavoriteIcon style={healthCheckColor(entry.healthCheckRating)} /> <br />
         diagnose by {entry.specialist}
       </Typography>
-      {entry.diagnosisCodes && (
+      {entry.diagnosisCodes && !entry.diagnosisCodes.includes('') && (
         <ul>
           {
             entry.diagnosisCodes.map((code) => (

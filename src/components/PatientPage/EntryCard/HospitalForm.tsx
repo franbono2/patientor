@@ -1,19 +1,22 @@
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { EntryWithoutId, HealthCheckRating } from "../../../types";
+import { EntryWithoutId } from "../../../types";
 
 interface Props {
   addEntry: (entry: EntryWithoutId) => Promise<void>;
 }
 
-const EntryForm = ({ addEntry } : Props) => {
+const HospitalForm = ({ addEntry } : Props) => {
   const initialState: EntryWithoutId = {
     description: '',
     date: '',
     specialist: '',
     diagnosisCodes: [''],
-    type: "HealthCheck",
-    healthCheckRating: HealthCheckRating.Healthy,
+    type: "Hospital",
+    discharge: {
+      date: "",
+      criteria: ""
+    },
   };
   const [formData, setFormData] = useState(initialState);
 
@@ -22,6 +25,17 @@ const EntryForm = ({ addEntry } : Props) => {
     setFormData({
       ...formData,
       [name]: value,
+    });
+  };
+
+  const handleDischargeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      discharge: {
+        ...formData.discharge,
+        [name]: value,
+      },
     });
   };
 
@@ -44,11 +58,11 @@ const EntryForm = ({ addEntry } : Props) => {
     border: '1px solid #ccc',
     borderRadius: '8px',
     boxShadow: 2,
+    marginTop: 3
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    formData.healthCheckRating = Number(formData.healthCheckRating);
     console.log('Form Data:', formData);
     addEntry(formData);
   };
@@ -61,7 +75,7 @@ const EntryForm = ({ addEntry } : Props) => {
   return (
     <Box component="form" sx={formStyle} onSubmit={handleSubmit}>
       <Typography variant="subtitle1" style={{ marginBottom: "0.5em", marginTop: "1em", textAlign: "center" }}>
-            New Entry
+            New HospitalEntry
       </Typography>
       <TextField 
         id="description"
@@ -93,16 +107,30 @@ const EntryForm = ({ addEntry } : Props) => {
         required
         fullWidth
         />
-      <TextField
-        id="healthCheckRating"
-        name="healthCheckRating"
-        value={formData.healthCheckRating}
-        onChange={handleChange}
-        label="Healthcheck Rating"
-        variant="standard" 
-        required
-        fullWidth
-        />
+        <Box sx={{display: "flex",
+          gap: 2
+        }}>
+          <TextField
+          id="dischargeDate"
+          name="date"
+          value={formData.discharge.date}
+          onChange={handleDischargeChange}
+          label="Date"
+          variant="standard" 
+          required
+          fullWidth
+          />
+          <TextField
+          id="dischargeCriteria"
+          name="criteria"
+          value={formData.discharge.criteria}
+          onChange={handleDischargeChange}
+          label="Criteria"
+          variant="standard" 
+          required
+          fullWidth
+          />
+        </Box>
       <TextField
         id="diagnosisCodes"
         name="diagnosisCodes"
@@ -140,4 +168,4 @@ const EntryForm = ({ addEntry } : Props) => {
   );
 };
 
-export default EntryForm;
+export default HospitalForm;

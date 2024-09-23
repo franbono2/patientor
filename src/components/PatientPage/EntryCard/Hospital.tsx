@@ -20,7 +20,7 @@ const Hospital = ({ entry, diagnoses } : { entry: HospitalEntry, diagnoses: Diag
         {entry.discharge.criteria} <br />
         diagnose by {entry.specialist}
       </Typography>
-      {entry.diagnosisCodes && (
+      {entry.diagnosisCodes && !entry.diagnosisCodes.includes('') && (
         <ul>
           {
             entry.diagnosisCodes.map((code) => (
